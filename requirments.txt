@@ -1,2 +1,6 @@
 requests
 flask
+pandas
+dotenv
+pydantic
+google-genai

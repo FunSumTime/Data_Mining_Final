@@ -1,6 +1,8 @@
 import requests
 import json
 import time
+
+
 # module  to make a   request to  a  webpage  (api)
 
 # make a request to the server to  get records,  can specify how many records you want.
@@ -31,7 +33,7 @@ def fetch_range_of_data(results_per_page=20,total_wanted=100):
         # best to  use data.get  as  if the sever  messed up  we wont mess  up
         # data.get("vulnerablilites,  []") second  param is  what to  defualt  to
       
-            batch =  data.get("vulnerablilities", [])
+            batch =  data.get("vulnerabilities", [])
             if not batch:
                 print("no more  data found  on server")
                 break
@@ -53,4 +55,52 @@ def fetch_range_of_data(results_per_page=20,total_wanted=100):
     print(f"Fetching complete!  got {len(all_vulnerabilities)} records")
     return  all_vulnerabilities
     
-data = fetch_range_of_data()
+
+def parse_nvd_record(record):
+    # 1. Drill down into the main 'cve' dictionary
+    cve_data = record.get('cve', {})
+    
+    # 2. Extract the basic programmatic facts
+    cve_id = cve_data.get('id', 'Unknown ID')
+    published_date = cve_data.get('published', 'Unknown Date')
+    
+    # Safely get the description text
+    descriptions = cve_data.get('descriptions', [])
+    english_desc = "No description available."
+    for desc in descriptions:
+        if desc.get('lang') == 'en':
+            english_desc = desc.get('value')
+            break
+            
+    # Safely extract the CVSS Severity Score (NVD uses V2, V3.0, or V3.1 depending on the year)
+    # This checks V2 since that's what your 1999 record uses
+    severity = "Unknown"
+    metrics = cve_data.get('metrics', {})
+    if 'cvssMetricV2' in metrics:
+        severity = metrics['cvssMetricV2'][0].get('baseSeverity', 'Unknown')
+        
+    # Safely extract the CPE strings (The software names)
+    cpe_strings = []
+    configs = cve_data.get('configurations', [])
+    for config in configs:
+        for node in config.get('nodes', []):
+            for match in node.get('cpeMatch', []):
+                cpe_strings.append(match.get('criteria'))
+                
+    # 3. Format the text to send to Gemini
+    # We combine the description and the raw CPEs into one prompt
+    llm_prompt = f"""
+    Analyze this vulnerability.
+    
+    Description: {english_desc}
+    Affected Software (CPEs): {', '.join(cpe_strings)}
+    """
+    
+    return {
+        "cve_id": cve_id,
+        "published_date": published_date,
+        "official_severity": severity,
+        "llm_prompt_text": llm_prompt
+    }
+
+# Assuming 'my_raw_json' is the dictionary you pasted above
