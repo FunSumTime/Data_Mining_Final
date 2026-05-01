@@ -5,6 +5,7 @@ import dotenv
 import os
 import json
 import pandas as pd
+import time
 
 
 
@@ -35,48 +36,38 @@ def get_client():
     return client
 
 # function to give the contents of the data comming in to a llm to have it categorize it
-def analyze_cve_with_gemini(cve_description: str,client) -> dict:
-    """Passes the raw CVE text to Gemini and forces it into our JSON schema."""
+def analyze_cve_with_gemini(cve_description: str, client, max_retries=3) -> dict:
+    """Passes the raw CVE text to Gemini and forces it into our JSON schema, with retries."""
     prompt = f"Analyze the following security vulnerability description and extract the required fields:\n\n{cve_description}"
-    try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=CVEAnalysis,
-                temperature=0.1, 
-            ),
-            # tempurature keeps the model factual if it is low as it controls the 'creativity'
-        )
-        
-        # The response.text is a JSON string. We convert it to a Python dictionary.
-        return json.loads(response.text)
-        
-    except Exception as e:
-        print(f"LLM extraction failed: {e}")
-        return None
-
-# --- 4. Putting it all together (Assuming you have your raw_cves list from Milestone 1) ---
-
-# Mock list of data just for this example
-
-
-# for item in raw_cves:
-#     cve_id = item['id']
-#     description = item['description']
     
-#     print(f"Analyzing {cve_id}...")
-    
-#     # Run the description through Gemini
-#     extracted_data = analyze_cve_with_gemini(description)
-    
-#     if extracted_data:
-#         # Combine the original ID with the Gemini insights
-#         record = {"cve_id": cve_id, **extracted_data}
-#         parsed_records.append(record)
-
-# # --- 5. Convert to Pandas ---
-# df = pd.DataFrame(parsed_records)
-# print("\nFinal Extracted DataFrame:")
-# print(df.head())
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                # If 2.5-flash stays completely down, can temporarily change this to 'gemini-1.5-flash'
+                model='gemini-2.5-flash', 
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=CVEAnalysis,
+                    temperature=0.1, 
+                ),
+            )
+            
+            # If successful, parse the JSON and return immediately
+            return json.loads(response.text)
+            
+        except Exception as e:
+            error_msg = str(e)
+            
+            # Check if it's a 503 Server Busy error
+            if "503" in error_msg or "UNAVAILABLE" in error_msg:
+                wait_time = 5 * (attempt + 1) # Waits 5s, then 10s, then 15s
+                print(f"      [!] API busy. Retrying in {wait_time} seconds... (Attempt {attempt + 1}/{max_retries})")
+                time.sleep(wait_time)
+            else:
+                # If it's a different error (like a schema validation failure), print it and stop trying
+                print(f"      [!] LLM extraction failed: {e}")
+                return None
+                
+    print("      [!] Max retries reached. Skipping this record for now.")
+    return None
