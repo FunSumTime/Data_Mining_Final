@@ -4,28 +4,28 @@ CVE-1999-0095,1988-10-01T04:00:00.000,HIGH,"
     
     Description: The debug command in Sendmail is enabled, allowing attackers to execute commands as root.
     Affected Software (CPEs): cpe:2.3:a:eric_allman:sendmail:5.58:*:*:*:*:*:*:*
-    ",Sendmail,True,An enabled debug command in Sendmail allows attackers to execute commands with root privileges.,Critical
+    ",Sendmail,True,"A debug command in Sendmail is enabled, which allows attackers to run commands with root privileges.",Critical
 CVE-1999-0082,1988-11-11T05:00:00.000,HIGH,"
     Analyze this vulnerability.
     
     Description: CWD ~root command in ftpd allows root access.
     Affected Software (CPEs): cpe:2.3:a:ftp:ftp:*:*:*:*:*:*:*:*, cpe:2.3:a:ftpcd:ftpcd:*:*:*:*:*:*:*:*
-    ",ftpd,True,A vulnerability in the FTP daemon (ftpd) allows an attacker to gain root access to the system by using the 'CWD ~root' command.,Critical
+    ",FTP Daemon (ftpd),True,A vulnerability in the FTP daemon (ftpd) allows an attacker to gain root access by using the CWD ~root command.,Critical
 CVE-1999-1471,1989-01-01T05:00:00.000,HIGH,"
     Analyze this vulnerability.
     
     Description: Buffer overflow in passwd in BSD based operating systems 4.3 and earlier allows local users to gain root privileges by specifying a long shell or GECOS field.
     Affected Software (CPEs): cpe:2.3:o:bsd:bsd:4.2:*:*:*:*:*:*:*, cpe:2.3:o:bsd:bsd:4.3:*:*:*:*:*:*:*
-    ",BSD based operating systems 4.3 and earlier,True,A buffer overflow vulnerability in the 'passwd' utility of BSD based operating systems (versions 4.3 and earlier) allows a local user to gain root privileges. This can be exploited by providing an excessively long input for the shell or GECOS fields.,Critical
+    ",passwd in BSD based operating systems 4.3 and earlier,True,A buffer overflow vulnerability in the 'passwd' program on BSD based operating systems version 4.3 and earlier allows a local user to gain root privileges by providing an excessively long shell or GECOS field.,Critical
 CVE-1999-1122,1989-07-26T04:00:00.000,MEDIUM,"
     Analyze this vulnerability.
     
     Description: Vulnerability in restore in SunOS 4.0.3 and earlier allows local users to gain privileges.
     Affected Software (CPEs): cpe:2.3:o:sun:sunos:*:*:*:*:*:*:*:*, cpe:2.3:o:sun:sunos:4.0:*:*:*:*:*:*:*, cpe:2.3:o:sun:sunos:4.0.1:*:*:*:*:*:*:*
-    ",SunOS,True,A security flaw in the 'restore' utility within SunOS versions 4.0.3 and earlier could allow a local user to elevate their privileges on the system.,High
+    ",SunOS,True,A vulnerability in the 'restore' utility in SunOS versions 4.0.3 and earlier allows local users to gain elevated privileges on the system.,High
 CVE-1999-1467,1989-10-26T04:00:00.000,HIGH,"
     Analyze this vulnerability.
     
     Description: Vulnerability in rcp on SunOS 4.0.x allows remote attackers from trusted hosts to execute arbitrary commands as root, possibly related to the configuration of the nobody user.
     Affected Software (CPEs): cpe:2.3:o:sun:sunos:4.0:*:*:*:*:*:*:*, cpe:2.3:o:sun:sunos:4.0.1:*:*:*:*:*:*:*, cpe:2.3:o:sun:sunos:4.0.2:*:*:*:*:*:*:*, cpe:2.3:o:sun:sunos:4.0.3:*:*:*:*:*:*:*, cpe:2.3:o:sun:sunos:4.0.3c:*:*:*:*:*:*:*
-    ",rcp on SunOS 4.0.x,True,A vulnerability in the rcp utility on SunOS 4.0.x allows remote attackers from trusted hosts to execute arbitrary commands with root privileges. This issue might be related to the configuration of the 'nobody' user.,Critical
+    ",rcp on SunOS 4.0.x,True,A security flaw in the 'rcp' command on SunOS 4.0.x allows remote attackers from trusted systems to execute any command they wish with root (administrator) privileges. This issue might be related to how the 'nobody' user is configured.,Critical

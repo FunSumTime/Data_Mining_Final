@@ -77,3 +77,47 @@ estimated_similarity = matches/ num_hashes
 
 print(f"Total matches: {matches}")
 print(f"Estimated Jaccard Similarity: {estimated_similarity * 100 }%")
+
+
+from collections import defaultdict
+
+def perform_lsh(signatures_dict, num_bands=20, rows_per_band=5):
+    """
+    signatures_dict: A dictionary where the key is the cve_id and the value is the 100-number array.
+    """
+    # This will hold our final pairs of documents that need to be compared
+    candidate_pairs = set()
+    
+    # We loop through one band at a time (e.g., Band 0, Band 1, Band 2...)
+    for band_idx in range(num_bands):
+        # Create fresh buckets for this specific band
+        buckets = defaultdict(list)
+        
+        # Calculate where this band starts and stops in the 100-number array
+        start_row = band_idx * rows_per_band
+        end_row = start_row + rows_per_band
+        
+        # Put every document into a bucket for this band
+        for cve_id, signature in signatures_dict.items():
+            # Slice out just the 5 numbers for this band
+            band_slice = signature[start_row:end_row]
+            
+            # Convert the list of numbers into a tuple (so it can be a dictionary key)
+            bucket_id = tuple(band_slice)
+            
+            # Drop the document ID into the bucket!
+            buckets[bucket_id].append(cve_id)
+            
+        # After sorting all documents for this band, check the buckets
+        for bucket_id, docs_in_bucket in buckets.items():
+            # If there's more than one document in this bucket, they are a candidate pair!
+            if len(docs_in_bucket) > 1:
+                # Add them to our final list (using a loop handles buckets with 3+ docs)
+                for i in range(len(docs_in_bucket)):
+                    for j in range(i + 1, len(docs_in_bucket)):
+                        # Sort them so (A, B) is the same as (B, A)
+                        pair = tuple(sorted([docs_in_bucket[i], docs_in_bucket[j]]))
+                        candidate_pairs.add(pair)
+                        
+    return candidate_pairs
+

@@ -5,3 +5,4 @@ dotenv
 pydantic
 google-genai
 streamlit
+streamlit-authenticator
